@@ -52,7 +52,7 @@
     [self addGestureRecognizer:singleTap];
     self.userInteractionEnabled = YES;
     //长按
-    UILongPressGestureRecognizer * longTap = [[UILongPressGestureRecognizer alloc]initWithTarget:self action:@selector(longTapDragView)];
+    UILongPressGestureRecognizer * longTap = [[UILongPressGestureRecognizer alloc]initWithTarget:self action:@selector(longTapDragView:)];
     [self addGestureRecognizer:longTap];
     //移动
     self.panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panDragAction:)];
@@ -70,7 +70,12 @@
     }
 }
 
--(void)longTapDragView{
+-(void)longTapDragView:(UILongPressGestureRecognizer*)longPress{
+    //防止多次触发
+    if (longPress.state != UIGestureRecognizerStateBegan)
+    {
+        return;
+    }
     if(self.longTapDragViewBlock){
         self.longTapDragViewBlock(self);
     }

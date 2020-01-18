@@ -47,6 +47,16 @@
         }
         
     };
+    orangeView.longTapDragViewBlock = ^(FQDragView * _Nonnull dragView) {
+        NSLog(@"橙色view被长按了");
+        dragView.dragEnable = !dragView.dragEnable;
+        if (dragView.dragEnable) {
+            [dragView.dragButton setTitle:@"可拖曳" forState:UIControlStateNormal];
+        }else{
+            [dragView.dragButton setTitle:@"不可拖曳" forState:UIControlStateNormal];
+        }
+    };
+    
     //    orangeView.EndDragBlock = ^(FQDragView *dragView) {
     //        [UIView animateWithDuration:0.5 animations:^{
     //            dragView.frame = CGRectMake(0, 0 , 70, 70);
