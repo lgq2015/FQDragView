@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BA0DBC0123D3E9CC000E5E5A /* FQSuspendedChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = BA0DBC0023D3E9CC000E5E5A /* FQSuspendedChannel.m */; };
+		BA0DBC0423D40534000E5E5A /* SVC.m in Sources */ = {isa = PBXBuildFile; fileRef = BA0DBC0323D40534000E5E5A /* SVC.m */; };
+		BA0DBC0A23D42214000E5E5A /* FQSuspensionTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = BA0DBC0923D42214000E5E5A /* FQSuspensionTransition.m */; };
 		BA16D34E23D1B08100A1B2FE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BA16D34D23D1B08100A1B2FE /* AppDelegate.m */; };
 		BA16D35123D1B08100A1B2FE /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA16D35023D1B08100A1B2FE /* ViewController.m */; };
 		BA16D35423D1B08100A1B2FE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BA16D35223D1B08100A1B2FE /* Main.storyboard */; };
@@ -36,6 +39,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BA0DBBFF23D3E9CC000E5E5A /* FQSuspendedChannel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FQSuspendedChannel.h; sourceTree = "<group>"; };
+		BA0DBC0023D3E9CC000E5E5A /* FQSuspendedChannel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FQSuspendedChannel.m; sourceTree = "<group>"; };
+		BA0DBC0223D40534000E5E5A /* SVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SVC.h; sourceTree = "<group>"; };
+		BA0DBC0323D40534000E5E5A /* SVC.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SVC.m; sourceTree = "<group>"; };
+		BA0DBC0823D42214000E5E5A /* FQSuspensionTransition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FQSuspensionTransition.h; sourceTree = "<group>"; };
+		BA0DBC0923D42214000E5E5A /* FQSuspensionTransition.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FQSuspensionTransition.m; sourceTree = "<group>"; };
 		BA16D34923D1B08100A1B2FE /* FQDragView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FQDragView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA16D34C23D1B08100A1B2FE /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		BA16D34D23D1B08100A1B2FE /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -114,6 +123,8 @@
 				BA16D35723D1B08300A1B2FE /* LaunchScreen.storyboard */,
 				BA16D35A23D1B08300A1B2FE /* Info.plist */,
 				BA16D35B23D1B08300A1B2FE /* main.m */,
+				BA0DBC0223D40534000E5E5A /* SVC.h */,
+				BA0DBC0323D40534000E5E5A /* SVC.m */,
 			);
 			path = FQDragView;
 			sourceTree = "<group>";
@@ -141,6 +152,10 @@
 			children = (
 				BA16D37F23D1B73E00A1B2FE /* FQDragView.h */,
 				BA16D38023D1B73E00A1B2FE /* FQDragView.m */,
+				BA0DBBFF23D3E9CC000E5E5A /* FQSuspendedChannel.h */,
+				BA0DBC0023D3E9CC000E5E5A /* FQSuspendedChannel.m */,
+				BA0DBC0823D42214000E5E5A /* FQSuspensionTransition.h */,
+				BA0DBC0923D42214000E5E5A /* FQSuspensionTransition.m */,
 			);
 			path = FQDragView;
 			sourceTree = "<group>";
@@ -275,9 +290,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BA0DBC0423D40534000E5E5A /* SVC.m in Sources */,
+				BA0DBC0123D3E9CC000E5E5A /* FQSuspendedChannel.m in Sources */,
 				BA16D35123D1B08100A1B2FE /* ViewController.m in Sources */,
 				BA16D35C23D1B08300A1B2FE /* main.m in Sources */,
 				BA16D34E23D1B08100A1B2FE /* AppDelegate.m in Sources */,
+				BA0DBC0A23D42214000E5E5A /* FQSuspensionTransition.m in Sources */,
 				BA16D38123D1B73E00A1B2FE /* FQDragView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

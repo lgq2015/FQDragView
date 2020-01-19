@@ -7,7 +7,7 @@
 //
 
 #import "ViewController.h"
-#import "FQDragView.h"
+#import "FQSuspendedChannel.h"
 
 @interface ViewController ()
 
@@ -80,7 +80,16 @@
     logoView.clickDragViewBlock = ^(FQDragView *dragView){
     
     };
+    FQSCInstance.suspensionView = logoView;
+    FQSCInstance.navCentr = self.navigationController;
+    FQSCInstance.spreadDuring = 0.5;
+    FQSCInstance.shrinkDuring = 0.5;
 }
 
+- (IBAction)nextAction:(id)sender {
+    Class class = NSClassFromString(@"SVC");
+    UIViewController * vc = [class new];
+    [self.navigationController pushViewController:vc animated:true];
+}
 
 @end
