@@ -45,6 +45,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, copy) void (^playSpreadSoundBlock)(void); // 展开浮窗
 @property (nonatomic, copy) void (^playShrinkSoundBlock)(void); // 创建/闭合浮窗
+/**
+ 转场时的临时视图插入
+ @param transitionView 添加的view
+ */
+- (void)insertTransitionView:(UIView *)transitionView;
 @end
 
 NS_ASSUME_NONNULL_END

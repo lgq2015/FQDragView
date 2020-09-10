@@ -16,7 +16,7 @@
 @implementation SVC
 
 - (void)viewDidLoad {
-    self.navigationController.navigationBarHidden = true;
+//    self.navigationController.navigationBarHidden = true;
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor cyanColor];
     _nexBtn = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -35,6 +35,11 @@
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    self.navigationController.navigationBarHidden = false;
 }
 
 -(void)afterClick{

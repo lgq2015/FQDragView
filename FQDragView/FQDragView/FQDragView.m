@@ -7,10 +7,13 @@
 //
 
 #import "FQDragView.h"
+#import "FQSuspendedChannel.h"
 
 @interface FQDragView()<UIGestureRecognizerDelegate>
 @property (nonatomic,strong) UIPanGestureRecognizer *panGestureRecognizer;
 @property (nonatomic,assign) CGPoint startPoint;
+@property (nonatomic, weak) UIVisualEffectView *effectView;
+@property (nonatomic, weak) CAShapeLayer *maskLayer;
 @end
 
 @implementation FQDragView
@@ -140,6 +143,95 @@
             break;
     }
     
+}
+
+- (void)shrinkSuspensionViewAnimationWithComplete:(void (^)(void))complete {
+    
+    self.userInteractionEnabled = NO;
+    
+    CGRect frame = self.layer.presentationLayer ? self.layer.presentationLayer.frame : self.layer.frame;
+    [self.layer removeAllAnimations];
+    self.layer.transform = CATransform3DIdentity;
+    self.layer.zPosition = 0;
+    BOOL isHideNavigationBar = false;
+    if (isHideNavigationBar) {
+        self.frame = (self.superview && self.superview != FQSCInstance.window) ? [self.superview convertRect:frame toView:FQSCInstance.window] : frame;
+        [FQSCInstance insertTransitionView:self];
+    } else {
+        self.frame = (self.superview && self.superview != FQSCInstance.navCentr.view) ? [self.superview convertRect:frame toView:FQSCInstance.navCentr.view] : frame;
+        [FQSCInstance.navCentr.view insertSubview:self belowSubview:FQSCInstance.navCentr.navigationBar];
+    }
+    
+//    [self addSubview:self.targetVC.view];
+    [self createEffectView];
+//    [self setupLogo];
+//    self.logoView.layer.opacity = 0;
+    
+    CAShapeLayer *maskLayer = [CAShapeLayer layer];
+    maskLayer.fillColor = [UIColor blackColor].CGColor;
+    maskLayer.path = [UIBezierPath bezierPathWithRoundedRect:self.bounds cornerRadius:0.1].CGPath;
+    [self.layer addSublayer:maskLayer];
+    self.maskLayer = maskLayer;
+    self.layer.mask = self.maskLayer;
+    
+    NSTimeInterval duration = 0.375;
+    
+//    [FQSCInstance playSoundForSpread:NO delay:duration * 0.5];
+    
+    UIBezierPath *toPath1 = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(0, 0, frame.size.width, frame.size.height) cornerRadius:frame.size.width * 0.5];
+    UIBezierPath *toPath2 = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(0, (frame.size.height - frame.size.width) * 0.5, frame.size.width, frame.size.width) cornerRadius:frame.size.width * 0.5];
+    CAKeyframeAnimation *kfAnim = [CAKeyframeAnimation animationWithKeyPath:@"path"];
+    kfAnim.values = @[(id)self.maskLayer.path, (id)toPath1.CGPath, (id)toPath2.CGPath];
+    kfAnim.keyTimes = @[@0, @0.5, @(1)];
+    kfAnim.duration = duration;
+    kfAnim.beginTime = CACurrentMediaTime();
+    kfAnim.fillMode = kCAFillModeForwards;
+    kfAnim.removedOnCompletion = NO;
+    [self.maskLayer addAnimation:kfAnim forKey:@"path"];
+    
+    CGFloat toScale = FQSCInstance.suspensionView.frame.size.width / frame.size.width;
+    CGPoint toPos = CGPointMake(CGRectGetMidX(FQSCInstance.suspensionView.frame), CGRectGetMidY(FQSCInstance.suspensionView.frame));
+    CATransform3D transform = self.layer.transform;
+    transform = CATransform3DMakeTranslation(toPos.x - self.layer.position.x, toPos.y - self.layer.position.y, 0);
+    transform = CATransform3DScale(transform, toScale, toScale, 1);
+    
+    [UIView animateWithDuration:duration delay:0 options:kNilOptions animations:^{
+        FQSCInstance.suspensionView.alpha = 0;
+//        self.targetVC.view.layer.opacity = 0;
+//        self.logoView.layer.opacity = 1;
+        self.layer.transform = transform;
+    } completion:^(BOOL finished) {
+        FQSCInstance.suspensionView = self;
+        
+        [self.maskLayer removeFromSuperlayer];
+//        [self.targetVC.view removeFromSuperview];
+//        self.targetVC.view.layer.opacity = 1;
+        
+        self.layer.transform = CATransform3DIdentity;
+        self.layer.cornerRadius = FQSCInstance.suspensionView.frame.size.width * 0.5;
+        self.layer.masksToBounds = YES;
+        self.layer.mask = nil;
+        self.frame = FQSCInstance.suspensionView.frame;
+        
+        self.effectView.frame = CGRectInset(self.bounds, -1, -1);
+        
+//        if (self.logoView) {
+//            CGFloat logoMargin = self.suspensionLogoMargin;
+//            self.logoView.frame = CGRectInset(self.bounds, logoMargin, logoMargin);
+//            self.logoView.layer.cornerRadius = self.logoView.frame.size.height * 0.5;
+//        }
+        
+        self.userInteractionEnabled = YES;
+        !complete ? : complete();
+    }];
+}
+
+- (void)createEffectView {
+    if (self.effectView) return;
+    UIVisualEffectView *effectView = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleDark]];
+    effectView.frame = CGRectInset(self.bounds, -1, -1);
+    [self insertSubview:effectView atIndex:0];
+    self.effectView = effectView;
 }
 
 //黏贴边界效果

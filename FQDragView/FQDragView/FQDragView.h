@@ -55,6 +55,8 @@ typedef NS_ENUM(NSUInteger, FQDragDirection) {
 @property(nonatomic,copy)void(^dragingBlock)(FQDragView* dragView);
 /** 结束拖动的回调 */
 @property(nonatomic,copy)void(^endDragBlock)(FQDragView* dragView);
+/** 转成浮窗的动画 */
+- (void)shrinkSuspensionViewAnimationWithComplete:(void(^)(void))complete;
 @end
 
 NS_ASSUME_NONNULL_END

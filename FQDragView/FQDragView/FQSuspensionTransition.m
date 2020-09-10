@@ -34,6 +34,9 @@
 @property (nonatomic, assign) BOOL isHideFromVCNavBar;
 @property (nonatomic, assign) BOOL isHideToVCNavBar;
 
+
+@property (nonatomic, assign) BOOL isInteraction;
+
 @end
 
 @implementation FQSuspensionTransition
@@ -43,6 +46,12 @@
         _transitionType = transitionType;
     }
     return self;
+}
+
++ (FQSuspensionTransition *)popTransitionWithIsInteraction:(BOOL)isInteraction{
+    FQSuspensionTransition * suspensionTransition = [[self alloc]initWithTransitionType:FQSuspensionTransitionTypePop];
+    suspensionTransition.isInteraction = isInteraction;
+    return suspensionTransition;
 }
 
 + (FQSuspensionTransition *)spreadTransitionWithSuspensionView:(FQDragView *)suspensionView {
@@ -69,6 +78,10 @@
         case FQSuspensionTransitionTypeSpread:
         {
             return _spreadDuring;
+        }
+        case FQSuspensionTransitionTypePop:
+        {
+            return _shrinkDuring;
         }
     }
 }
@@ -104,6 +117,10 @@
     }
     
     switch (_transitionType) {
+        case FQSuspensionTransitionTypePop: {
+            [self popAnimation];
+            break;
+        }
         case FQSuspensionTransitionTypeSpread:
         {
             [self spreadSuspensionViewAnimation];
@@ -115,6 +132,73 @@
             break;
         }
     }
+}
+
+-(void)popAnimation{
+    NSTimeInterval duration = [self transitionDuration:self.transitionContext];
+    CGRect toVCFrame = self.toVC.view.frame;
+    toVCFrame.origin.x = -FQSCInstance.window.bounds.size.width * 0.3;
+    self.toVC.view.frame = toVCFrame;
+    toVCFrame.origin.x = 0;
+    
+    FQDragView * suspensionView = [[FQDragView alloc]initWithFrame:CGRectMake(100, 400, 50, 50)];
+    CGRect fromVCFrame = self.fromVC.view.frame;
+    fromVCFrame.origin.x = 0;
+    suspensionView.frame = fromVCFrame;
+    fromVCFrame.origin.x = FQSCInstance.window.bounds.size.width;
+    
+    // 当fromVC.edgesForExtendedLayout为UIRectEdgeNone且有导航栏的情况下
+    // fromVC.view的y值为导航栏的最大高度，导致在suspensionView上会往下偏移，这里调整位置
+    self.fromVC.view.frame = suspensionView.bounds;
+    [suspensionView addSubview:self.fromVC.view];
+    
+    [self.containerView addSubview:self.toVC.view];
+    [self.containerView addSubview:self.tabBar];
+    [self.containerView addSubview:suspensionView];
+    self.suspensionView = suspensionView;
+    
+    UINavigationController *navCtr = self.toVC.navigationController;
+    UINavigationBar *navBar = navCtr.navigationBar;
+    CGRect navBarFrame = navBar.frame;
+    // 如果fromVC本来就隐藏了导航栏，就不需要添加系统动画效果
+    [navCtr setNavigationBarHidden:self.isHideToVCNavBar animated:YES];
+    if (navBar && navBar.superview) {
+        self.navBar = navBar;
+        self.navBarSuperView = navBar.superview;
+        self.navBarIndex = [navBar.superview.subviews indexOfObject:navBar];
+        // 如果fromVC本来就隐藏了导航栏，不添加系统动画，而且将它挪到suspensionView底下，然后自定义动画
+        if (self.isHideFromVCNavBar) {
+            [navBar.layer removeAllAnimations];
+            navBarFrame.origin.x = self.toVC.view.frame.origin.x;
+            navBar.frame = navBarFrame;
+            navBarFrame.origin.x = 0;
+            [self.containerView insertSubview:self.navBar belowSubview:suspensionView];
+            // 导航栏removeAllAnimations之后就会置顶显示，为了盖住导航栏，需要将浮窗的zPosition增加
+            suspensionView.layer.zPosition = 1;
+        }
+    }
+    
+    // 触发了【setNavigationBarHidden:animated:】之后tabBar也会自动添加一个系统动画，将之移除
+    CGRect tabBarFrame = CGRectZero;
+    if (self.tabBar) {
+        [self.tabBar.layer removeAllAnimations];
+        tabBarFrame = self.tabBar.frame;
+        tabBarFrame.origin.x = self.toVC.view.frame.origin.x;
+        self.tabBar.frame = tabBarFrame;
+        tabBarFrame.origin.x = 0;
+    }
+    
+    UIViewAnimationOptions options = self.isInteraction ? UIViewAnimationOptionCurveLinear : UIViewAnimationOptionCurveEaseOut;
+    [UIView animateWithDuration:duration delay:0 options:options animations:^{
+        if (self.tabBar) self.tabBar.frame = tabBarFrame;
+        if (self.navBar) self.navBar.frame = navBarFrame;
+        self.toVC.view.frame = toVCFrame;
+        suspensionView.frame = fromVCFrame;
+    } completion:^(BOOL finished) {
+        if (!self.isShrinkSuspension) {
+            [self transitionCompletion];
+        }
+    }];
 }
 
 -(void)spreadSuspensionViewAnimation{
@@ -264,6 +348,10 @@
     self.toVC.view.userInteractionEnabled = self.toViewOriginEnabled;
     
     switch (self.transitionType) {
+        case FQSuspensionTransitionTypePop: {
+            [self popTransitionCompletion];
+            break;
+        }
         case FQSuspensionTransitionTypeSpread:
         {
             [self spreadSuspensionViewTransitionCompletion];
@@ -277,6 +365,25 @@
     }
 }
 
+-(void)popTransitionCompletion {
+    if ([self.transitionContext transitionWasCancelled]) {
+        // 如果fromVC本来就隐藏了导航栏，我pop的时候移除了它本来的系统动画，这里取消了就要将导航栏恢复
+        if (self.isHideFromVCNavBar) {
+            [self.toVC.navigationController setNavigationBarHidden:self.isHideFromVCNavBar animated:YES];
+        } else {
+            // iOS8中这里的navBar的alpha为0
+            [self.navBar.layer removeAllAnimations];
+            self.navBar.alpha = 1;
+        }
+        [self.containerView addSubview:self.fromVC.view];
+        [self.suspensionView removeFromSuperview];
+        [self.transitionContext completeTransition:NO];
+    } else {
+        [self.suspensionView removeFromSuperview];
+        [self.transitionContext completeTransition:YES];
+    }
+}
+
 - (void)spreadSuspensionViewTransitionCompletion {
     [self.bgView removeFromSuperview];
     [self.containerView addSubview:self.toVC.view];
@@ -285,7 +392,9 @@
 }
 
 - (void)shrinkSuspensionViewTransitionCompletion {
-//    if (FQSCInstance.suspensionView == self.suspensionView) [FQSCInstance insertTransitionView:self.fromVC.view];
+    if (FQSCInstance.suspensionView == self.suspensionView){
+        [FQSCInstance insertTransitionView:self.fromVC.view];
+    }
     [UIView animateWithDuration:0.2 animations:^{
         self.suspensionView.alpha = 1;
         if (FQSCInstance.suspensionView == self.suspensionView) {
